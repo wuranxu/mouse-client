@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option go_package = "../proto";
+
+message Message {
+  optional bytes data = 1;
+  int64 sceneId = 2;
+  string msgType = 3;
+}
+
+message Task {
+  // unique scene id
+  int64 sceneId = 1;
+  // maxQps
+  optional int32 maxQps = 2;
+  // threads
+  int32 threads = 3;
+  // latest if 0 then run forever until user stop
+  optional int64 minutes = 4;
+  // interval threads created in how many seconds
+  optional int32 interval = 5;
+}
+
+message StopTask {
+  int64 sceneId = 1;
+}
+
+message Scene {
+  int64 sceneId = 1;
+}
+
+message MouseResponse {
+  int32 code = 1;
+  string msg = 2;
+  optional bytes data = 3;
+}
+
+service MouseService {
+  // connect
+  rpc Connect(stream Message) returns (stream Message) {}
+  // disconnect
+  rpc Disconnect(Message) returns (MouseResponse) {}
+  // stat
+  rpc Stat(Message) returns (MouseResponse) {}
+  // start job for scene
+  rpc Start(Task) returns (MouseResponse) {}
+  // stop job for scene
+  rpc Stop(StopTask) returns (MouseResponse) {}
+}
