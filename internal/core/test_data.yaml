@@ -9,9 +9,9 @@ steps:
     status_check: true
     out:
       - name: 返回token
-        from: response
+        from: Response
         extract_type: JSONPath
-        expression: $.data.data.token
+        expression: $.data.token
         variable: login_token
     check:
       - name: 判断用户是否登录成功

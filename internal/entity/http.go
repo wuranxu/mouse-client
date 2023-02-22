@@ -44,8 +44,9 @@ type HTTPRequest struct {
 	// allow redirect to another url
 	AllowRedirect bool `json:"allowRedirect"`
 	// request body
-	Body   any        `json:"body"`
-	Method HTTPMethod `json:"method"`
+	Body    any        `json:"body"`
+	Method  HTTPMethod `json:"method"`
+	Timeout int        `json:"timeout"`
 }
 
 type HTTPResponse struct {
@@ -95,8 +96,28 @@ func WithBody(data any) RequestOption {
 	}
 }
 
+func WithQuery(query map[string]string) RequestOption {
+	return func(h *HTTPRequest) {
+		first := true
+		for k, v := range query {
+			if first {
+				h.Url = h.Url + "?" + k + "=" + v
+				first = false
+				continue
+			}
+			h.Url = h.Url + "&" + k + "=" + v
+		}
+	}
+}
+
 func WithRedirect(redirect bool) RequestOption {
 	return func(h *HTTPRequest) {
 		h.AllowRedirect = redirect
+	}
+}
+
+func WithTimeout(timeout int) RequestOption {
+	return func(h *HTTPRequest) {
+		h.Timeout = timeout
 	}
 }

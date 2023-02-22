@@ -1,26 +1,5 @@
-// Package resource include test file(yaml) and how to parse yaml
-package resource
-
-import (
-	json "github.com/json-iterator/go"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
-)
-
-type (
-	ExtractType string
-	Assertion   string
-)
-
-const (
-	JSONPath ExtractType = "JSONPath"
-)
-
-const (
-	Equal    Assertion = "equal"
-	NotEqual Assertion = "not_equal"
-	Contain  Assertion = "contain"
-)
+// Package scene include test file(yaml) and how to parse yaml
+package scene
 
 // Step test step
 type Step struct {
@@ -32,12 +11,15 @@ type Step struct {
 	StatusCheck bool              `json:"status_check" yaml:"status_check"`
 	Out         []*Out            `json:"out" yaml:"out"`
 	Check       []*Check          `json:"check" yaml:"check"`
+	Query       map[string]string `json:"query" yaml:"query"`
+	Timeout     int               `json:"timeout"`
 }
 
 // Out extract parameters
 type Out struct {
-	Name        string      `json:"name" yaml:"name"`
-	From        string      `json:"from" yaml:"from"`
+	Name string `json:"name" yaml:"name"`
+	// parameters from
+	From        FromType    `json:"from" yaml:"from"`
 	ExtractType ExtractType `json:"extractType" yaml:"extract_type"`
 	Expression  string      `json:"expression" yaml:"expression"`
 	Variable    string      `json:"variable" yaml:"variable"`
@@ -57,25 +39,4 @@ type Check struct {
 type Scene struct {
 	Name  string  `json:"name" yaml:"name"`
 	Steps []*Step `json:"steps" yaml:"steps"`
-}
-
-func LoadYamlFile(file string, scene *Scene) error {
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		return err
-	}
-	return yaml.Unmarshal(data, scene)
-}
-
-func LoadJSONFile(file string, scene *Scene) error {
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(data, scene)
-}
-
-// Load load data
-func Load(data []byte, scene *Scene) error {
-	return yaml.Unmarshal(data, scene)
 }

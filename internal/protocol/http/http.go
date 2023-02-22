@@ -27,8 +27,7 @@ type Invoker interface {
 type Option func(*Client)
 
 type Client struct {
-	Timeout int64 `json:"timeout"`
-	client  *http.Client
+	client *http.Client
 }
 
 var httpClient = &Client{client: new(http.Client)}
@@ -59,15 +58,6 @@ func NewHTTPClient(options ...Option) *Client {
 		opt(client)
 	}
 	return client
-}
-
-func WithTimeout(ms int64) Option {
-	return func(c *Client) {
-		if ms < 500 {
-			return
-		}
-		c.Timeout = ms
-	}
 }
 
 func (h *Client) Get(request *entity.HTTPRequest) *entity.HTTPResponse {
@@ -130,8 +120,8 @@ func (h *Client) Do(request *entity.HTTPRequest) *entity.HTTPResponse {
 		Header: header,
 	}
 	h.makeRequestBody(request, req)
-	if h.Timeout > 0 {
-		h.client.Timeout = time.Duration(h.Timeout) * time.Microsecond
+	if request.Timeout > 0 {
+		h.client.Timeout = time.Duration(request.Timeout) * time.Microsecond
 	}
 	start := time.Now()
 	resp, err := h.client.Do(req)

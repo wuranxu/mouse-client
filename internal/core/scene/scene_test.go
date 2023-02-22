@@ -1,6 +1,8 @@
-package resource
+package scene
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestLoadYamlFile(t *testing.T) {
 	var scene Scene
