@@ -6,9 +6,9 @@ import (
 	"github.com/wuranxu/mouse-client/internal/core/scene"
 	"github.com/wuranxu/mouse-client/internal/entity"
 	"github.com/wuranxu/mouse-client/internal/protocol/http"
-	"log"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var (
@@ -25,16 +25,6 @@ type Runner struct {
 
 // Run scene case
 func (r *Runner) Run(ctx context.Context) {
-	go func() {
-		for {
-			select {
-			case <-r.stat.success:
-				log.Println("success")
-			case data := <-r.stat.failure:
-				log.Println("error: ", data.Exception)
-			}
-		}
-	}()
 	select {
 	case <-ctx.Done():
 		return
@@ -43,29 +33,44 @@ func (r *Runner) Run(ctx context.Context) {
 	}
 }
 
+func (r *Runner) Stat(ctx context.Context) {
+	r.stat.startTime = time.Now()
+	r.stat.stat(ctx)
+}
+
 func (r *Runner) run() {
 	params := make(map[string][]byte)
+	var (
+		timestamp int64
+		elapsed   int64
+	)
 	for _, step := range r.scene.Steps {
 		// build http
 		req := r.buildHTTP(step, params)
 		// request
 		resp := r.client.Do(req)
+		timestamp = time.Now().Unix()
+		elapsed += resp.Elapsed
 		if resp.Error != nil {
-			r.stat.failure <- Failed(resp.Error)
-			return
-		}
-		// assert
-		if err := scene.Assert(step.Check); err != nil {
-			r.stat.failure <- Failed(resp.Error)
-			return
+			r.stat.failure <- Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, resp.Error)
+			r.stat.sceneFailure <- Failed(r.scene.Name, elapsed, resp.StatusCode, resp.Data, timestamp, resp.Error)
+			break
 		}
 		// extract parameters
 		if err := r.extractParameters(resp, step.Out, &params); err != nil {
-			r.stat.failure <- Failed(err)
-			return
+			r.stat.failure <- Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err)
+			r.stat.sceneFailure <- Failed(r.scene.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err)
+			break
 		}
+		// assert
+		if err := scene.Assert(step.Check, params); err != nil {
+			r.stat.failure <- Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err)
+			r.stat.sceneFailure <- Failed(r.scene.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err)
+			break
+		}
+		r.stat.success <- Success(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp)
 	}
-	r.stat.success <- Success()
+	r.stat.sceneSuccess <- Success(r.scene.Name, elapsed, 200, "", timestamp)
 }
 
 // buildHTTP build http request
@@ -145,8 +150,12 @@ func NewRunner(sceneId int64, sceneData []byte) (*Runner, error) {
 		scene:   &sc,
 		client:  http.NewHTTPClient(),
 		stat: &RequestStat{
-			success: make(chan *TestResult, 500),
-			failure: make(chan *TestResult, 500),
+			success:      make(chan *TestResult, 2000),
+			failure:      make(chan *TestResult, 2000),
+			sceneSuccess: make(chan *TestResult, 2000),
+			sceneFailure: make(chan *TestResult, 2000),
+			stepStat:     make(map[int64]map[string]*stepStat),
+			sceneStat:    make(map[int64]*sceneStat),
 		},
 	}, nil
 }

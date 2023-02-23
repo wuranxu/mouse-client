@@ -7,9 +7,11 @@ import (
 	"github.com/wuranxu/mouse-client/proto"
 	tool "github.com/wuranxu/mouse-tool"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 	"log"
 	"net"
 	"strings"
+	"time"
 )
 
 var (
@@ -25,7 +27,10 @@ func printBanner() {
 
 func main() {
 	flag.Parse()
-	server := grpc.NewServer()
+	server := grpc.NewServer(grpc.KeepaliveParams(keepalive.ServerParameters{
+		Time:    8 * time.Second, // Ping the client if it is idle for 5 seconds to ensure the connection is still active
+		Timeout: 2 * time.Second,
+	}))
 	mouse := &api.MouseServiceApi{}
 	proto.RegisterMouseServiceServer(server, mouse)
 	addr := "0.0.0.0:"

@@ -20,11 +20,14 @@ func TestNewRunner(t *testing.T) {
 		return
 	}
 
-	limiterModel, err := model.NewRateLimiterModel(1, 30*time.Second)
+	//limiterModel, err := model.NewRateLimiterModel(20, 300*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	limiterModel, err := model.NewRangeModel(50, 1)
 	if err != nil {
 		t.Error("create model failed", err)
 		return
 	}
 
-	limiterModel.Run(context.TODO(), runner)
+	limiterModel.Run(ctx, runner)
 }

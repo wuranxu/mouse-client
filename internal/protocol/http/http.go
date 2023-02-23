@@ -125,7 +125,7 @@ func (h *Client) Do(request *entity.HTTPRequest) *entity.HTTPResponse {
 	}
 	start := time.Now()
 	resp, err := h.client.Do(req)
-	end := time.Since(start).Microseconds() / 1000
+	end := time.Since(start).Milliseconds()
 	if err != nil {
 		return &entity.HTTPResponse{Error: err, Elapsed: end, Response: entity.NewResponse(false, nil)}
 	}
