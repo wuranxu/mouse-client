@@ -1,0 +1,15 @@
+{
+  "port": 0,
+  "etcd": {
+    "prefix": "mouse:node",
+    "endpoints": [
+      "localhost:2379"
+    ]
+  },
+  "kafka": {
+    "endpoints": [
+      "localhost:9092"
+    ],
+    "topic": "mouse-message"
+  }
+}

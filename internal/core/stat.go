@@ -19,6 +19,7 @@ type sceneStat struct {
 }
 
 type RequestStat struct {
+	sceneId      int64
 	stepStat     map[int64]map[string]*stepStat
 	sceneStat    map[int64]*sceneStat
 	success      chan *TestResult
