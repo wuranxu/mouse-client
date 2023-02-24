@@ -2,6 +2,8 @@ package core
 
 import (
 	"context"
+	"fmt"
+	tool "github.com/wuranxu/mouse-tool"
 	"log"
 	"time"
 )
@@ -20,8 +22,8 @@ type sceneStat struct {
 
 type RequestStat struct {
 	taskId       int64
-	stepStat     map[int64]map[string]*stepStat
-	sceneStat    map[int64]*sceneStat
+	stepStat     map[time.Time]map[string]*stepStat
+	sceneStat    map[time.Time]*sceneStat
 	success      chan *TestResult
 	failure      chan *TestResult
 	sceneSuccess chan *TestResult
@@ -32,6 +34,9 @@ type RequestStat struct {
 	sceneFailedNum  int64
 	cost            int64
 	startTime       time.Time
+
+	addr   string
+	influx *tool.InfluxdbClient
 }
 
 type TestResult struct {
@@ -41,7 +46,7 @@ type TestResult struct {
 	Response   string
 	Elapsed    int64
 	Exception  string
-	EndTime    int64
+	EndTime    time.Time
 }
 
 func (s *RequestStat) stat(ctx context.Context) {
@@ -65,7 +70,7 @@ func (s *RequestStat) Upload() {
 	ms := time.Since(s.startTime).Milliseconds()
 	qpsAvg := s.sceneNum / (ms / 1000.0)
 	// RT
-	rt := ms / s.sceneNum
+	rt := s.cost / s.sceneNum
 	log.Println("scene qps: ", qpsAvg)
 	log.Println("total scene: ", s.sceneNum)
 	log.Println("total cost: ", s.cost)
@@ -79,27 +84,47 @@ func (s *RequestStat) statStep(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case data := <-s.success:
-			if _, ok := s.stepStat[data.EndTime]; !ok {
-				s.stepStat[data.EndTime] = make(map[string]*stepStat, 0)
+			if err := s.write(data); err != nil {
+				log.Fatal("write record to influxdb error: ", err)
 			}
-			if _, ok := s.stepStat[data.EndTime][data.Name]; !ok {
-				s.stepStat[data.EndTime][data.Name] = new(stepStat)
-			}
-			s.stepStat[data.EndTime][data.Name].requestNum++
-			s.stepStat[data.EndTime][data.Name].successNum++
-			s.stepStat[data.EndTime][data.Name].cost += data.Elapsed
+			//if _, ok := s.stepStat[data.EndTime]; !ok {
+			//	s.stepStat[data.EndTime] = make(map[string]*stepStat, 0)
+			//}
+			//if _, ok := s.stepStat[data.EndTime][data.Name]; !ok {
+			//	s.stepStat[data.EndTime][data.Name] = new(stepStat)
+			//}
+			//s.stepStat[data.EndTime][data.Name].requestNum++
+			//s.stepStat[data.EndTime][data.Name].successNum++
+			//s.stepStat[data.EndTime][data.Name].cost += data.Elapsed
 		case data := <-s.failure:
-			if _, ok := s.stepStat[data.EndTime]; !ok {
-				s.stepStat[data.EndTime] = make(map[string]*stepStat, 0)
+			if err := s.write(data); err != nil {
+				log.Fatal("write record to influxdb error: ", err)
 			}
-			if _, ok := s.stepStat[data.EndTime][data.Name]; !ok {
-				s.stepStat[data.EndTime][data.Name] = new(stepStat)
-			}
-			s.stepStat[data.EndTime][data.Name].requestNum++
-			s.stepStat[data.EndTime][data.Name].failedNum++
-			s.stepStat[data.EndTime][data.Name].cost += data.Elapsed
+			//if _, ok := s.stepStat[data.EndTime]; !ok {
+			//	s.stepStat[data.EndTime] = make(map[string]*stepStat, 0)
+			//}
+			//if _, ok := s.stepStat[data.EndTime][data.Name]; !ok {
+			//	s.stepStat[data.EndTime][data.Name] = new(stepStat)
+			//}
+			//s.stepStat[data.EndTime][data.Name].requestNum++
+			//s.stepStat[data.EndTime][data.Name].failedNum++
+			//s.stepStat[data.EndTime][data.Name].cost += data.Elapsed
 		}
 	}
+}
+
+func (s *RequestStat) write(result *TestResult) error {
+	return s.influx.Write("report", map[string]string{
+		"taskId":   fmt.Sprintf("%v", s.taskId),
+		"hostname": s.addr,
+	}, map[string]interface{}{
+		"elapsed":     result.Elapsed,
+		"response":    result.Response,
+		"name":        result.Name,
+		"status_code": result.StatusCode,
+		"exception":   result.Exception,
+		"result":      result.Result,
+	}, result.EndTime)
 }
 
 func (s *RequestStat) statScene(ctx context.Context) {
@@ -131,7 +156,7 @@ func (s *RequestStat) statScene(ctx context.Context) {
 	}
 }
 
-func Success(name string, elapsed int64, status int, response string, now int64) *TestResult {
+func Success(name string, elapsed int64, status int, response string, now time.Time) *TestResult {
 	return &TestResult{
 		Result:     true,
 		Name:       name,
@@ -142,7 +167,7 @@ func Success(name string, elapsed int64, status int, response string, now int64)
 	}
 }
 
-func Failed(name string, elapsed int64, status int, response string, now int64, err error) *TestResult {
+func Failed(name string, elapsed int64, status int, response string, now time.Time, err error) *TestResult {
 	return &TestResult{
 		Exception:  err.Error(),
 		Result:     false,

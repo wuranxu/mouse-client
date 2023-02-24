@@ -6,6 +6,7 @@ import (
 	"github.com/wuranxu/mouse-client/internal/core/scene"
 	"github.com/wuranxu/mouse-client/internal/entity"
 	"github.com/wuranxu/mouse-client/internal/protocol/http"
+	tool "github.com/wuranxu/mouse-tool"
 	"regexp"
 	"strings"
 	"time"
@@ -21,6 +22,7 @@ type Runner struct {
 	scene  *scene.Scene
 	client *http.Client
 	stat   *RequestStat
+	addr   string
 }
 
 func NewRunner(taskId int64, sceneData []byte) (*Runner, error) {
@@ -39,10 +41,19 @@ func NewRunner(taskId int64, sceneData []byte) (*Runner, error) {
 			failure:      make(chan *TestResult, 2000),
 			sceneSuccess: make(chan *TestResult, 2000),
 			sceneFailure: make(chan *TestResult, 2000),
-			stepStat:     make(map[int64]map[string]*stepStat),
-			sceneStat:    make(map[int64]*sceneStat),
+			stepStat:     make(map[time.Time]map[string]*stepStat),
+			sceneStat:    make(map[time.Time]*sceneStat),
 		},
 	}, nil
+}
+
+func (r *Runner) SetInflux(client *tool.InfluxdbClient) {
+	r.stat.influx = client
+}
+
+func (r *Runner) SetAddr(addr string) {
+	r.addr = addr
+	r.stat.addr = addr
 }
 
 // Run scene case
@@ -76,7 +87,7 @@ func (r *Runner) Stat(ctx context.Context) {
 func (r *Runner) run() {
 	params := make(map[string][]byte)
 	var (
-		timestamp int64
+		timestamp time.Time
 		elapsed   int64
 	)
 	for _, step := range r.scene.Steps {
@@ -85,7 +96,7 @@ func (r *Runner) run() {
 
 		// request
 		resp := r.client.Do(req)
-		timestamp = time.Now().Unix()
+		timestamp = time.Now()
 		elapsed += resp.Elapsed
 		if resp.Error != nil {
 			r.storeStepResult(Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, resp.Error), false)

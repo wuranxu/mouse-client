@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"runtime"
 	"time"
 )
 
@@ -34,6 +35,9 @@ func loadConfig(filepath string, v interface{}) error {
 
 func main() {
 	flag.Parse()
+	// set max cpu number
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	// load config file
 	var cfg MouseConfig
 	err := loadConfig(*ConfigFile, &cfg)
@@ -69,6 +73,17 @@ func main() {
 		log.Fatal("register to etcd error: ", err)
 	}
 	defer client.Close()
+
+	// connect influxdb
+	influxdbClient, err := tool.NewInfluxdbClient(cfg.Influxdb.Addr, cfg.Influxdb.Token, cfg.Influxdb.Org, cfg.Influxdb.Bucket)
+	if err != nil {
+		log.Fatal("connect to influxdb error: ", err)
+	}
+
+	defer influxdbClient.Close()
+	mouse.Influx = influxdbClient
+	mouse.Addr = fmt.Sprintf("%v:%d", client.Host(), port)
+
 	printBanner()
 	log.Println("mouse server is listening at: ", port)
 	server.Serve(listen)

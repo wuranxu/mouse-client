@@ -7,6 +7,7 @@ import (
 	"github.com/wuranxu/mouse-client/internal/core/model"
 	"github.com/wuranxu/mouse-client/proto"
 	tool "github.com/wuranxu/mouse-tool"
+	"time"
 )
 
 const (
@@ -34,6 +35,8 @@ type MouseServiceApi struct {
 	proto.UnimplementedMouseServiceServer
 	taskId int64
 	Client *tool.EtcdClient
+	Influx *tool.InfluxdbClient
+	Addr   string
 	cancel context.CancelFunc
 	runner *core.Runner
 }
@@ -61,6 +64,11 @@ func (m *MouseServiceApi) Start(ctx context.Context, task *proto.Task) (*proto.M
 		resp.Msg = WrapMsg(ErrorStartJob, err.Error())
 		return resp, nil
 	}
+
+	// set influxdb client and etcd client
+	runner.SetInflux(m.Influx)
+	runner.SetAddr(m.Addr)
+
 	var (
 		md model.IModel
 	)
@@ -77,7 +85,7 @@ func (m *MouseServiceApi) Start(ctx context.Context, task *proto.Task) (*proto.M
 		return resp, nil
 	}
 
-	ct, cancel := context.WithCancel(context.Background())
+	ct, cancel := context.WithTimeout(context.Background(), time.Duration(*task.Interval)*time.Minute)
 	m.cancel = cancel
 	if err = md.Run(ct, runner); err != nil {
 		m.reset()

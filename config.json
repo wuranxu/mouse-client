@@ -11,5 +11,11 @@
       "localhost:9092"
     ],
     "topic": "mouse-message"
+  },
+  "influxdb": {
+    "org": "mouse",
+    "addr": "http://localhost:8086",
+    "bucket": "mouse",
+    "token": "XEx54uaRrm-0Oa_w-ZjJ45BhQP2fugcWdcpbwH1hIrbsfR1qmPmFlLfSXBy-krk8ZfxSVTpaX0R4IF41QPshfw=="
   }
 }
