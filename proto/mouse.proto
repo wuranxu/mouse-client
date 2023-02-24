@@ -4,13 +4,13 @@ option go_package = "../proto";
 
 message Message {
   optional bytes data = 1;
-  int64 sceneId = 2;
+  int64 taskId = 2;
   string msgType = 3;
 }
 
 message Task {
   // unique scene id
-  int64 sceneId = 1;
+  int64 taskId = 1;
   // scene data
   bytes data = 6;
   // maxQps
@@ -28,11 +28,11 @@ message Empty {
 }
 
 message StopTask {
-  int64 sceneId = 1;
+  int64 taskId = 1;
 }
 
 message Scene {
-  int64 sceneId = 1;
+  int64 taskId = 1;
 }
 
 message MouseResponse {

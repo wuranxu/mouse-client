@@ -1,14 +1,14 @@
 package http
 
 import (
-	"github.com/wuranxu/mouse/pkg/protocol"
+	"github.com/wuranxu/mouse-client/internal/entity"
 	"log"
 	"testing"
 )
 
 func TestHTTPClient_Get(t *testing.T) {
 	client := NewHTTPClient()
-	request := NewRequest("https://www.baidu.com", protocol.GET)
+	request := NewRequest("https://www.baidu.com", entity.GET)
 	resp := client.Get(request)
 	if resp.Error != nil {
 		t.Error("request failed", resp.Error)

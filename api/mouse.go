@@ -32,10 +32,10 @@ func WrapMsg(err error, msg string) string {
 
 type MouseServiceApi struct {
 	proto.UnimplementedMouseServiceServer
-	sceneId int64
-	Client  *tool.EtcdClient
-	cancel  context.CancelFunc
-	runner  *core.Runner
+	taskId int64
+	Client *tool.EtcdClient
+	cancel context.CancelFunc
+	runner *core.Runner
 }
 
 //func (m *MouseServiceApi) Stat(ctx context.Context, _ *proto.Empty) (*proto.MouseResponse, error) {
@@ -44,17 +44,17 @@ type MouseServiceApi struct {
 
 func (m *MouseServiceApi) reset() {
 	m.cancel = nil
-	m.sceneId = 0
+	m.taskId = 0
 	m.runner = nil
 }
 
 func (m *MouseServiceApi) Start(ctx context.Context, task *proto.Task) (*proto.MouseResponse, error) {
-	if m.sceneId != 0 {
+	if m.taskId != 0 {
 		return &proto.MouseResponse{Code: ExistsJobErrorCode, Msg: ErrorJobExists.Error()}, nil
 	}
 
 	resp := &proto.MouseResponse{Code: 0, Msg: Success}
-	runner, err := core.NewRunner(task.SceneId, task.Data)
+	runner, err := core.NewRunner(task.TaskId, task.Data)
 	if err != nil {
 		m.reset()
 		resp.Code = StartJobErrorCode
@@ -90,7 +90,7 @@ func (m *MouseServiceApi) Start(ctx context.Context, task *proto.Task) (*proto.M
 
 func (m *MouseServiceApi) Stop(ctx context.Context, task *proto.StopTask) (*proto.MouseResponse, error) {
 	resp := &proto.MouseResponse{Code: 0, Msg: Success}
-	if m.sceneId != task.SceneId {
+	if m.taskId != task.TaskId {
 		return &proto.MouseResponse{Code: NotExistsJobErrorCode, Msg: ErrorJobNotExists.Error()}, nil
 	}
 	// stop job

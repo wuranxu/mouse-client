@@ -55,7 +55,7 @@ func (r *RangeModel) Run(ctx context.Context, worker IRunner) error {
 		}
 		time.Sleep(time.Second)
 	}
-	r.wg.Wait()
+	go r.wg.Wait()
 	return nil
 }
 

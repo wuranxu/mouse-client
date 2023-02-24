@@ -17,24 +17,24 @@ var (
 )
 
 type Runner struct {
-	sceneId int64
-	scene   *scene.Scene
-	client  *http.Client
-	stat    *RequestStat
+	taskId int64
+	scene  *scene.Scene
+	client *http.Client
+	stat   *RequestStat
 }
 
-func NewRunner(sceneId int64, sceneData []byte) (*Runner, error) {
+func NewRunner(taskId int64, sceneData []byte) (*Runner, error) {
 	var sc scene.Scene
 	// load scene data
 	if err := scene.Load(sceneData, &sc); err != nil {
 		return nil, err
 	}
 	return &Runner{
-		sceneId: sceneId,
-		scene:   &sc,
-		client:  http.NewHTTPClient(),
+		taskId: taskId,
+		scene:  &sc,
+		client: http.NewHTTPClient(),
 		stat: &RequestStat{
-			sceneId:      sceneId,
+			taskId:       taskId,
 			success:      make(chan *TestResult, 2000),
 			failure:      make(chan *TestResult, 2000),
 			sceneSuccess: make(chan *TestResult, 2000),
