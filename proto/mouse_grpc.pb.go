@@ -22,12 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MouseServiceClient interface {
-	// connect
-	Connect(ctx context.Context, opts ...grpc.CallOption) (MouseService_ConnectClient, error)
-	// disconnect
-	Disconnect(ctx context.Context, in *Message, opts ...grpc.CallOption) (*MouseResponse, error)
+	//  // connect
+	//  rpc Connect(stream Message) returns (stream Message) {}
+	//  // disconnect
+	//  rpc Disconnect(Message) returns (MouseResponse) {}
 	// stat
-	Stat(ctx context.Context, in *Message, opts ...grpc.CallOption) (*MouseResponse, error)
+	//  rpc Stat(Empty) returns (MouseResponse) {}
 	// start job for scene
 	Start(ctx context.Context, in *Task, opts ...grpc.CallOption) (*MouseResponse, error)
 	// stop job for scene
@@ -40,55 +40,6 @@ type mouseServiceClient struct {
 
 func NewMouseServiceClient(cc grpc.ClientConnInterface) MouseServiceClient {
 	return &mouseServiceClient{cc}
-}
-
-func (c *mouseServiceClient) Connect(ctx context.Context, opts ...grpc.CallOption) (MouseService_ConnectClient, error) {
-	stream, err := c.cc.NewStream(ctx, &MouseService_ServiceDesc.Streams[0], "/MouseService/Connect", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &mouseServiceConnectClient{stream}
-	return x, nil
-}
-
-type MouseService_ConnectClient interface {
-	Send(*Message) error
-	Recv() (*Message, error)
-	grpc.ClientStream
-}
-
-type mouseServiceConnectClient struct {
-	grpc.ClientStream
-}
-
-func (x *mouseServiceConnectClient) Send(m *Message) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *mouseServiceConnectClient) Recv() (*Message, error) {
-	m := new(Message)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *mouseServiceClient) Disconnect(ctx context.Context, in *Message, opts ...grpc.CallOption) (*MouseResponse, error) {
-	out := new(MouseResponse)
-	err := c.cc.Invoke(ctx, "/MouseService/Disconnect", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *mouseServiceClient) Stat(ctx context.Context, in *Message, opts ...grpc.CallOption) (*MouseResponse, error) {
-	out := new(MouseResponse)
-	err := c.cc.Invoke(ctx, "/MouseService/Stat", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *mouseServiceClient) Start(ctx context.Context, in *Task, opts ...grpc.CallOption) (*MouseResponse, error) {
@@ -113,12 +64,12 @@ func (c *mouseServiceClient) Stop(ctx context.Context, in *StopTask, opts ...grp
 // All implementations must embed UnimplementedMouseServiceServer
 // for forward compatibility
 type MouseServiceServer interface {
-	// connect
-	Connect(MouseService_ConnectServer) error
-	// disconnect
-	Disconnect(context.Context, *Message) (*MouseResponse, error)
+	//  // connect
+	//  rpc Connect(stream Message) returns (stream Message) {}
+	//  // disconnect
+	//  rpc Disconnect(Message) returns (MouseResponse) {}
 	// stat
-	Stat(context.Context, *Message) (*MouseResponse, error)
+	//  rpc Stat(Empty) returns (MouseResponse) {}
 	// start job for scene
 	Start(context.Context, *Task) (*MouseResponse, error)
 	// stop job for scene
@@ -130,15 +81,6 @@ type MouseServiceServer interface {
 type UnimplementedMouseServiceServer struct {
 }
 
-func (UnimplementedMouseServiceServer) Connect(MouseService_ConnectServer) error {
-	return status.Errorf(codes.Unimplemented, "method Connect not implemented")
-}
-func (UnimplementedMouseServiceServer) Disconnect(context.Context, *Message) (*MouseResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Disconnect not implemented")
-}
-func (UnimplementedMouseServiceServer) Stat(context.Context, *Message) (*MouseResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Stat not implemented")
-}
 func (UnimplementedMouseServiceServer) Start(context.Context, *Task) (*MouseResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Start not implemented")
 }
@@ -156,68 +98,6 @@ type UnsafeMouseServiceServer interface {
 
 func RegisterMouseServiceServer(s grpc.ServiceRegistrar, srv MouseServiceServer) {
 	s.RegisterService(&MouseService_ServiceDesc, srv)
-}
-
-func _MouseService_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(MouseServiceServer).Connect(&mouseServiceConnectServer{stream})
-}
-
-type MouseService_ConnectServer interface {
-	Send(*Message) error
-	Recv() (*Message, error)
-	grpc.ServerStream
-}
-
-type mouseServiceConnectServer struct {
-	grpc.ServerStream
-}
-
-func (x *mouseServiceConnectServer) Send(m *Message) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *mouseServiceConnectServer) Recv() (*Message, error) {
-	m := new(Message)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _MouseService_Disconnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MouseServiceServer).Disconnect(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/MouseService/Disconnect",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MouseServiceServer).Disconnect(ctx, req.(*Message))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _MouseService_Stat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MouseServiceServer).Stat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/MouseService/Stat",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MouseServiceServer).Stat(ctx, req.(*Message))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _MouseService_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -264,14 +144,6 @@ var MouseService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*MouseServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Disconnect",
-			Handler:    _MouseService_Disconnect_Handler,
-		},
-		{
-			MethodName: "Stat",
-			Handler:    _MouseService_Stat_Handler,
-		},
-		{
 			MethodName: "Start",
 			Handler:    _MouseService_Start_Handler,
 		},
@@ -280,13 +152,6 @@ var MouseService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _MouseService_Stop_Handler,
 		},
 	},
-	Streams: []grpc.StreamDesc{
-		{
-			StreamName:    "Connect",
-			Handler:       _MouseService_Connect_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "mouse.proto",
 }

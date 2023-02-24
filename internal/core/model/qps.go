@@ -3,17 +3,12 @@ package model
 import (
 	"context"
 	"errors"
-	"github.com/wuranxu/mouse-client/internal/core/scene"
 	"log"
 )
 
 var (
 	QpsNotValid = errors.New("qps not valid")
 )
-
-type StressModel interface {
-	Run(context.Context, *scene.Scene) error
-}
 
 type IRunner interface {
 	Run(context.Context)
@@ -48,7 +43,7 @@ func (r *RateLimiterModel) Run(ctx context.Context, worker IRunner) error {
 	}
 }
 
-func NewRateLimiterModel(qps int) (*RateLimiterModel, error) {
+func NewRateLimiterModel(qps int) (IModel, error) {
 	if qps <= 0 {
 		return nil, QpsNotValid
 	}

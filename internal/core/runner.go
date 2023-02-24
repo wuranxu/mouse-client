@@ -64,6 +64,10 @@ func (r *Runner) storeStepResult(result *TestResult, ok bool) {
 	r.stat.sceneFailure <- result
 }
 
+func (r *Runner) StatInfo() *RequestStat {
+	return r.stat
+}
+
 func (r *Runner) Stat(ctx context.Context) {
 	r.stat.startTime = time.Now()
 	r.stat.stat(ctx)

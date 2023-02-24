@@ -13,6 +13,10 @@ var (
 	PeriodNotValid = errors.New("ram range not valid")
 )
 
+type IModel interface {
+	Run(ctx context.Context, worker IRunner) error
+}
+
 type RangeModel struct {
 	user   int
 	period int
@@ -55,7 +59,7 @@ func (r *RangeModel) Run(ctx context.Context, worker IRunner) error {
 	return nil
 }
 
-func NewRangeModel(user, period int) (*RangeModel, error) {
+func NewRangeModel(user, period int) (IModel, error) {
 	if user <= 0 {
 		return nil, UserNotValid
 	}

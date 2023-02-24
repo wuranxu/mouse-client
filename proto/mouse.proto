@@ -11,14 +11,20 @@ message Message {
 message Task {
   // unique scene id
   int64 sceneId = 1;
+  // scene data
+  bytes data = 6;
   // maxQps
   optional int32 maxQps = 2;
   // threads
-  int32 threads = 3;
+  optional int32 threads = 3;
   // latest if 0 then run forever until user stop
   optional int64 minutes = 4;
   // interval threads created in how many seconds
   optional int32 interval = 5;
+}
+
+message Empty {
+
 }
 
 message StopTask {
@@ -36,12 +42,12 @@ message MouseResponse {
 }
 
 service MouseService {
-  // connect
-  rpc Connect(stream Message) returns (stream Message) {}
-  // disconnect
-  rpc Disconnect(Message) returns (MouseResponse) {}
+  //  // connect
+  //  rpc Connect(stream Message) returns (stream Message) {}
+  //  // disconnect
+  //  rpc Disconnect(Message) returns (MouseResponse) {}
   // stat
-  rpc Stat(Message) returns (MouseResponse) {}
+//  rpc Stat(Empty) returns (MouseResponse) {}
   // start job for scene
   rpc Start(Task) returns (MouseResponse) {}
   // stop job for scene
