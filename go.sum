@@ -82,8 +82,8 @@ github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
 github.com/valyala/fasttemplate v1.2.1/go.mod h1:KHLXt3tVN2HBp8eijSv/kGJopbvo7S+qRAEEKiv+SiQ=
-github.com/wuranxu/mouse-tool v0.0.0-20230224082543-a8cadc281106 h1:QN+SL9qmziPT2c2FWNSr1Fm5qPPfGCbcWLUNNSrHO0M=
-github.com/wuranxu/mouse-tool v0.0.0-20230224082543-a8cadc281106/go.mod h1:oR6gv0RfNh8T68kxq0c5d8OP5dK9CeBmhREqTPgWOtY=
+github.com/wuranxu/mouse-tool v0.0.0-20230226102811-9ff02468e638 h1:ZWccW2Bron2oLnOEP7VyOA/R6D0bqkxJvJBxmP92QxY=
+github.com/wuranxu/mouse-tool v0.0.0-20230226102811-9ff02468e638/go.mod h1:oR6gv0RfNh8T68kxq0c5d8OP5dK9CeBmhREqTPgWOtY=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 go.etcd.io/etcd/api/v3 v3.5.7 h1:sbcmosSVesNrWOJ58ZQFitHMdncusIifYcrBfwrlJSY=

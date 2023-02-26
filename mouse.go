@@ -9,9 +9,10 @@ import (
 	tool "github.com/wuranxu/mouse-tool"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
+	"os"
 	"runtime"
 	"time"
 )
@@ -26,7 +27,11 @@ func printBanner() {
 }
 
 func loadConfig(filepath string, v interface{}) error {
-	data, err := ioutil.ReadFile(filepath)
+	file, err := os.OpenFile(filepath, os.O_RDONLY, 0666)
+	if err != nil {
+		return err
+	}
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/json-iterator/go v1.1.12
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
-	github.com/wuranxu/mouse-tool v0.0.0-20230224082543-a8cadc281106
+	github.com/wuranxu/mouse-tool v0.0.0-20230226102811-9ff02468e638
 	golang.org/x/time v0.3.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1

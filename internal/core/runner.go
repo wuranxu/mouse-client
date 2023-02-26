@@ -37,6 +37,7 @@ func NewRunner(taskId int64, sceneData []byte) (*Runner, error) {
 		client: http.NewHTTPClient(),
 		stat: &RequestStat{
 			taskId:       taskId,
+			result:       make(chan *TestResult, 2000),
 			success:      make(chan *TestResult, 2000),
 			failure:      make(chan *TestResult, 2000),
 			sceneSuccess: make(chan *TestResult, 2000),
@@ -99,27 +100,27 @@ func (r *Runner) run() {
 		timestamp = time.Now()
 		elapsed += resp.Elapsed
 		if resp.Error != nil {
-			r.storeStepResult(Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, resp.Error), false)
+			r.stat.result <- Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, resp.Error)
 			break
 		}
 
 		// extract parameters
 		if err := r.extractParameters(resp, step.Out, &params); err != nil {
-			r.storeStepResult(Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err), false)
+			r.stat.result <- Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err)
 			break
 		}
 		// assert
 		if err := scene.Assert(step.Check, params); err != nil {
-			r.storeStepResult(Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err), false)
+			r.stat.result <- Failed(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp, err)
 			break
 		}
 
-		// store step success
-		r.storeStepResult(Success(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp), true)
+		r.stat.result <- Success(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp)
+		//r.storeStepResult(Success(step.Name, elapsed, resp.StatusCode, resp.Data, timestamp), true)
 	}
 
 	// store scene success
-	r.stat.sceneSuccess <- Success(r.scene.Name, elapsed, 200, "", timestamp)
+	//r.stat.sceneSuccess <- Success(r.scene.Name, elapsed, 200, "", timestamp)
 }
 
 // buildHTTP build http request
