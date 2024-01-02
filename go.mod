@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/json-iterator/go v1.1.12
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
+	github.com/stretchr/testify v1.8.1
 	github.com/wuranxu/mouse-tool v0.0.0-20230226102811-9ff02468e638
 	golang.org/x/time v0.3.0
 	google.golang.org/grpc v1.53.0
@@ -15,6 +16,7 @@ require (
 require (
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deepmap/oapi-codegen v1.8.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -24,8 +26,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
-	github.com/stretchr/testify v1.8.1 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.7 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.7 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.7 // indirect
