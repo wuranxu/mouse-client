@@ -1,18 +1,19 @@
 package scene
 
 import (
-	"reflect"
 	"unsafe"
 )
 
-func ToString(data []byte) string {
-	sh := (*reflect.StringHeader)(unsafe.Pointer(&data))
-	bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len, Cap: sh.Len}
-	return *(*string)(unsafe.Pointer(&bh))
+func ToBytes(str string) []byte {
+	if str == "" {
+		return nil
+	}
+	return unsafe.Slice(unsafe.StringData(str), len(str))
 }
 
-func ToBytes(data string) []byte {
-	sh := (*reflect.StringHeader)(unsafe.Pointer(&data))
-	bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len, Cap: sh.Len}
-	return *(*[]byte)(unsafe.Pointer(&bh))
+func ToString(bs []byte) string {
+	if len(bs) == 0 {
+		return ""
+	}
+	return unsafe.String(unsafe.SliceData(bs), len(bs))
 }
