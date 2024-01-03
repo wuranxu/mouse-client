@@ -3,6 +3,7 @@ module github.com/wuranxu/mouse-client
 go 1.20
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/json-iterator/go v1.1.12
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852
 	github.com/stretchr/testify v1.8.1

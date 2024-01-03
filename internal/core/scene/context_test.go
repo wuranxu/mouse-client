@@ -6,7 +6,7 @@ import (
 )
 
 func TestTemplateStringRender(t *testing.T) {
-	result, err := Render("{{.honey.ff }}", map[string]any{"honey": map[string]any{"ff": "lixiaoyao"}})
+	result, err := Render(`fggrfgrf{{uuid .honey.ff}}`, map[string]any{"honey": map[string]any{"ff": "lixiaoyao"}})
 	if err != nil {
 		t.Fail()
 	}

@@ -17,16 +17,20 @@ func Assert(check []*Check, params map[string][]byte) error {
 		if ck.Disabled {
 			continue
 		}
+		if s, ok := params[ck.Actually]; ok {
+			ck.Actually = ToString(s)
+		}
+		if s, ok := params[ck.Expected]; ok {
+			ck.Expected = ToString(s)
+		}
 		switch ck.AssertType {
 		case Equal:
-			if s, ok := params[ck.Actually]; ok {
-				ck.Actually = ToString(s)
-			}
-			if s, ok := params[ck.Expected]; ok {
-				ck.Expected = ToString(s)
-			}
 			if ck.Actually != ck.Expected {
-				return fmt.Errorf("【%s】 %s: %v != %v", ck.Name, ck.ErrorMsg, ck.Expected, ck.Actually)
+				return fmt.Errorf("【%s】 %s: %v is not equal to %v", ck.Name, ck.ErrorMsg, ck.Actually, ck.Expected)
+			}
+		case NotEqual:
+			if ck.Actually == ck.Expected {
+				return fmt.Errorf("【%s】 %s: %v is equal to %v", ck.Name, ck.ErrorMsg, ck.Actually, ck.Expected)
 			}
 		}
 	}
